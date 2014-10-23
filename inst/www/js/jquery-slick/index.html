@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="robots" content="all" />
+<title>jQuery Slick Plugin v 2.1</title>
+<link rel="stylesheet" href="css/dcslick.css" type="text/css" media="screen" />
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.slick.2.1.js"></script>
+<script type="text/javascript">
+$(document).ready(function($){
+	
+	$('#slick-1').dcSlick();
+	$('#slick-2').dcSlick({
+			location: 'right',
+			align: 'top',
+			offset: '100px',
+			speed: 'slow',
+			tabText: 'Slick 2',
+			autoClose: false,
+			loadOpen: true
+	});
+	$('#slick-3').dcSlick({
+			location: 'top',
+			align: 'right',
+			offset: '50px',
+			speed: 'slow',
+			tabText: 'Slick 3',
+			autoClose: true
+	});
+	$('#slick-4').dcSlick({
+			location: 'left',
+			align: 'top',
+			offset: '100px',
+			speed: 'slow',
+			tabText: 'Slick 1',
+			autoClose: false
+	});
+	$('#slick-5').dcSlick({
+			location: 'bottom',
+			align: 'left',
+			offset: '100px',
+			speed: 'slow',
+			tabText: 'Slick 5',
+			autoClose: true
+	});
+	$('#slick-6').dcSlick({
+			location: 'bottom',
+			align: 'right',
+			offset: '200px',
+			speed: 'fast',
+			tabText: 'Slick 6',
+			autoClose: true
+	});
+});
+</script>
+<style>
+body,html,div,blockquote,img,label,p,h1,h2,h3,h4,h5,h6,pre,ul,ol,li,dl,dt,dd,form,a,fieldset,input,th,td{border:0;outline:none;margin:0;padding:0;}
+ul{list-style:none; line-height: 1.5em;}
+
+body {font: normal 13px Arial, sans-serif;}
+h2 {font: normal 26px Arial, sans-serif; padding: 20px 0; margin: 0 0 30px 0;}
+.wrap {width: 960px; margin: 0 auto;}
+.demo-container {width: 260px; margin: 50px auto;}
+.demo-container h4 {font-size: 14px; margin: 0 0 5px 0;}
+.clear {clear: both;}
+.test {background: #990000;}
+.dc-slick-content p {margin-bottom: 1em;}
+.dc-slick-content a {color: #fff;}
+.tab {color: #fff; font-weight: bold;}
+
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<h2>jQuery Slick Plugin v 2.1 - <a href="http://www.designchemical.com/lab/jquery-slick-plugin/getting-started/">Visit Plugin Site</a></h2>
+<p><a href="#" class="slick-toggle">Toggle Tabs</a></p>
+<p><a href="#" class="slick-close">Close Tabs</a></p>
+<p><a href="#" class="slick-open">Open Tabs</a></p>
+<div id="slick-2">
+<p>Dicat velit doctus cu his, te iriure feugait pri, semper quaestio id vel. Ius assum aliquid civibus eu. Comprehensam conclusionemque ne qui, vim ad malis partiendo. No illum lorem perfecto ius, et eos quas iusto.</p>
+<p>Soleat malorum sed ei, ex mei sint sale mandamus, probo noluisse prodesset te nam. Mentitum volutpat dissentias cu eam, vim minim patrioque ea. Meis utroque inimicus ne mel. Epicurei splendide suscipiantur ius ut, kasd graece commune sed ei. Vis deseruisse intellegam ne, has probo ornatus et. No dicat etiam ius, dicit tantas ut sea.</p>
+</div>
+
+<div id="slick-1">
+<ul>
+<li><a href="#">Home</a></li>
+<li><a href="#">About</a></li>
+<li><a href="#">Terms &amp; Conditions</a></li>
+<li><a href="#">Contacts</a></li>
+</ul>
+</div>
+
+<div id="slick-3">
+<p>Soleat malorum sed ei, ex mei sint sale mandamus, probo noluisse prodesset te nam. Mentitum volutpat dissentias cu eam, vim minim patrioque ea. Meis utroque inimicus ne mel. Epicurei splendide suscipiantur ius ut, kasd graece commune sed ei. Vis deseruisse intellegam ne, has probo ornatus et. No dicat etiam ius, dicit tantas ut sea.</p>
+<p>Eos ex summo facilisi iudicabit. Dico dolores delicatissimi eam eu. Quodsi definiebas nam ex. His ea ponderum ocurreret tincidunt, his eu nulla democritum temporibus. Possim timeam philosophia est ut, pro iracundia aliquando ne. Virtute reprimique eam ne, cu quo alii facer partiendo, nam eu natum mucius.</p>
+</div>
+<div id="slick-4">
+<p>Soleat malorum sed ei, ex mei sint sale mandamus, probo noluisse prodesset te nam. Mentitum volutpat dissentias cu eam, vim minim patrioque ea. Meis utroque inimicus ne mel. Epicurei splendide suscipiantur ius ut, kasd graece commune sed ei. Vis deseruisse intellegam ne, has probo ornatus et. No dicat etiam ius, dicit tantas ut sea.</p>
+<p>Eos ex summo facilisi iudicabit. Dico dolores delicatissimi eam eu. Quodsi definiebas nam ex. His ea ponderum ocurreret tincidunt, his eu nulla democritum temporibus. Possim timeam philosophia est ut, pro iracundia aliquando ne. Virtute reprimique eam ne, cu quo alii facer partiendo, nam eu natum mucius.</p>
+</div>
+<div id="slick-5">
+<ul>
+<li><a href="#">Home</a></li>
+<li><a href="#">About</a></li>
+<li><a href="#">Terms &amp; Conditions</a></li>
+<li><a href="#">Contacts</a></li>
+</ul>
+</div>
+<div id="slick-6">
+<ul>
+<li><a href="#">Home</a></li>
+<li><a href="#">About</a></li>
+<li><a href="#">Terms &amp; Conditions</a></li>
+<li><a href="#">Contacts</a></li>
+</ul>
+</div>
+</body>
+</html>

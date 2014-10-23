@@ -1,0 +1,2 @@
+OBJECTS = licorn.o 
+all: $(SHLIB)

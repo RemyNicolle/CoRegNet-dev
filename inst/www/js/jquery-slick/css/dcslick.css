@@ -1,0 +1,75 @@
+.dc-slick {
+width: 260px; /* Required to limit width of slick content */
+background: #333; 
+padding: 20px; 
+font-family: Arial;
+}
+.dc-slick .dc-slick-content {
+overflow: auto; /* Required for content that may exceed browser width/height */
+color: #fff;
+}
+/* Positioning of slick content */
+.dc-slick.top  {
+top: 0;
+}
+.dc-slick.right  {
+right: 0;
+}
+.dc-slick.bottom  {
+bottom: 0;
+}
+.dc-slick.left  {
+left: 0;
+}
+/* Positioning for tab and alignment */
+.dc-slick .tab {
+cursor: pointer; 
+font-size: 12px; 
+line-height: 12px; 
+background: #333; 
+padding: 10px; 
+color: #fff; 
+font-weight: bold;
+}
+.dc-slick, .dc-slick .tab {
+border: 3px solid #ccc;
+}
+.dc-slick.right .tab, .dc-slick.left .tab {
+top: 0;
+}
+.dc-slick.top .tab {
+bottom: 3px; /* Set to same width as border */
+}
+.dc-slick.top, .dc-slick.top .tab {
+border-top: none;
+}
+.dc-slick.right .tab {
+left: 3px; /* Set to same width as border */
+margin-top: -3px;
+}
+.dc-slick.right, .dc-slick.right .tab {
+border-right: none;
+}
+.dc-slick.bottom .tab {
+top: 3px;
+}
+.dc-slick.bottom, .dc-slick.bottom .tab {
+border-bottom: none;
+}
+.dc-slick.left .tab {
+right: 3px; /* Set to same width as border */
+margin-top: -3px;
+}
+.dc-slick.left, .dc-slick.left .tab {
+border-left: none;
+}
+
+.dc-slick.align-right .tab {
+margin-right: -3px; /* Set to same width as border */
+}
+.dc-slick.align-left .tab {
+margin-left: -3px; /* Set to same width as border */
+}
+
+.dc-slick-content p {margin-bottom: 1em; line-height: 1.5em;}
+.dc-slick-content a {color: #fff;}
