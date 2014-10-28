@@ -147,8 +147,8 @@ var createNormalNet = function(data){
                             'content': 'data(name)',
                             'text-valign': 'center',
                             'text-outline-width': 2,
-                            'text-outline-color': 'mapData(color, -15, 15, blue, red)',
-                            'background-color': 'mapData(color, -15, 15, blue, red)'
+                            'text-outline-color': 'mapData(color, -10, 10, blue, red)',
+                            'background-color': 'mapData(color, -10, 10, blue, red)'
                             })
                        .selector(':selected')
                        .css({
@@ -247,8 +247,8 @@ var createPieNet = function(data){
                             'color':'white',
                             'content': 'data(name)',
                             'text-outline-width': 2,
-                            'text-outline-color': 'mapData(color, -15, 15, blue, red)',
-                            'background-color': 'mapData(color, -15, 15, blue, red)',
+                            'text-outline-color': 'mapData(color, -10, 10, blue, red)',
+                            'background-color': 'mapData(color, -10, 10, blue, red)',
                             'pie-size': '80%',
                             'pie-1-background-color': '#2b83ba',
                             'pie-1-background-size': 'mapData(delet, 0, 100, 0, 100)',
