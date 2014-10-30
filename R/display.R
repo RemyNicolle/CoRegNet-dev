@@ -231,7 +231,7 @@ display <- function(coregnetwork,expressionData=NULL,TFA = NULL,alterationData=N
 
 
 .distfun=function(x) as.dist((1 - cor(t(x)))/2 )
-.hclustfun = function(d) hclust(d,method="ward")
+.hclustfun = function(d) hclust(d,method="ward.D2")
 
 .heatplot = function(subexpr,clinical=NULL,TFnotes=NULL){
   if(!is.null(clinical)){
@@ -247,7 +247,7 @@ display <- function(coregnetwork,expressionData=NULL,TFA = NULL,alterationData=N
   }
   subexpr=t(subexpr)
   distf = function(x){as.dist((1-cor(t(x))))}
-  hclustf = function(d){hclust(d,method="ward")}
+  hclustf = function(d){hclust(d,method="ward.D2")}
   
   bluetored=colorRampPalette(c("blue","white", "red"))
     if(require(gplots)){

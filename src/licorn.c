@@ -4,9 +4,9 @@
 #include <string.h>
 #include <time.h>
 
-#define TAILLE_MOT  100// maximum size of the name of a coreg
+#define TAILLE_MOT  500// maximum size of the name of a coreg (for x max possible coreg : x*(1+1+5) [space+x+20000possible gene]
 #define TAILLE_OCTET 8
-#define TAILLE_LIGNE 10000 //TAILLE_LIGNE=taille maximum des lignes dans le fichier des corégulateurs
+#define TAILLE_LIGNE 40000 //TAILLE_LIGNE=taille maximum des lignes dans le fichier des corégulateurs
 #define TAILLE_SUPPORT_BIT 500 //TAILLE_SUPPORT > (nombre d'expérience*2)/8
 #define TAILLE_SUPPORT_INT 4000 //TAILLE_SUPPORT_INT = nombre d'expérience*2
 
