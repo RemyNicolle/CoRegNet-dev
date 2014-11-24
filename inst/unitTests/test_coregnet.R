@@ -81,15 +81,15 @@ checkEqualsNumeric(as.numeric(unlist(enrichcoop@evidenceDescription[,2:8])),c(NA
 }
 
 test_hLICORN <-function(){
-  ex=matrix(seq(-3,2.998,by=0.002),ncol=500,dimnames=list(paste("g",1:6,sep=""),paste("sample",1:500,sep="")))
-  ex[5:6,] =-1*ex[5:6,]
-  dummyNet1=hLICORN(ex,TFlist =paste("g",3:6,sep="") )@GRN  
-  checkEquals( dummyNet1$Target ,rep(c("g1","g2"),each=10))
-  checkEquals( dummyNet1$coact ,rep(c(NA,rep("g4",3),rep("g3 g4",3),rep("g3",3)),2))
-  checkEquals( dummyNet1$corep ,rep( c("g5","g6","g5 g6" ,"g5","g6","g5 g6", "g5","g6","g5 g6", "g5"),2))
-  checkEqualsNumeric(dummyNet1$R2,rep(1,20),tolerance=1.0e-4)
-  checkEqualsNumeric(dummyNet1$RMSE,rep(0,20),tolerance=1.0e-4)
-  dummyNet2=hLICORN(ex,TFlist =paste("g",3:6,sep="") ,parallel = "no" )@GRN
+    ex=matrix(seq(-3,3,length.out=140),ncol=20,dimnames=list(c(letters[1:2],LETTERS[1:5]),paste("sample",1:20,sep="")))
+  ex[5:7,] =-0.6*ex[5:7,]
+  dummyNet1=hLICORN(ex,TFlist =LETTERS[1:5] )@GRN
+  checkEquals( dummyNet1$Target ,rep(c("a","b"),each=3))
+  checkEquals( dummyNet1$coact ,c("A","B","A B","A","B","A B"))
+  #  checkEquals( dummyNet1$corep ,rep( NA,6))
+  checkEqualsNumeric(dummyNet1$R2,rep(1,6),tolerance=1.0e-4)
+  checkEqualsNumeric(dummyNet1$RMSE,rep(0,6),tolerance=1.0e-4)
+  dummyNet2=hLICORN(ex,TFlist =LETTERS[1:5]  ,parallel = "no" )@GRN
   checkEquals(dummyNet1[,1:3],dummyNet2[,1:3])
 }
 

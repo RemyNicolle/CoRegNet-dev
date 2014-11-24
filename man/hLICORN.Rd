@@ -12,7 +12,10 @@ hLICORN(numericalExpression, discreteExpression =
 discretizeExpressionData(numericalExpression), 
 TFlist, GeneList = setdiff(rownames(numericalExpression), TFlist),
 parallel = c("multicore", "no", "snow"), cluster = NULL,
-searchParameters = c("fast", "accurate"), verbose = FALSE)
+minGeneSupport=0.1,minCoregSupport = 0.2,
+maxCoreg=floor(log(ncol(numericalExpression),base=3)),
+searchThresh=0.5,nGRN=100,
+verbose=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -55,10 +58,15 @@ A object of type cluster from the snow package which describes
 a cluster of computer to run the inference of each gene in parallel.
 Needed only when parallel is set to snow.
 }
-  \item{searchParameters}{
-optional. Can be either a character defining the type of LICORN parameters 
-to use fast or accurate or a list specifying partially or
-all the LICORN parameters. See details.
+  \item{minGeneSupport}{
+}
+ \item{minCoregSupport}{
+}
+ \item{maxCoreg}{
+}
+ \item{searchThresh}{
+}
+ \item{nGRN}{
 }
   \item{verbose}{
 Sets wether information will appear in console during computation.
@@ -134,16 +142,18 @@ The speed of the inference is dependant on several factors. The number of genes,
 \examples{
 # Dummy expression data
 gexp=matrix(rnorm(2600,sd=3),ncol=100)
+
 gexp=rbind(gexp,do.call(rbind,lapply(1:26,function(i){
 tf = sample(1:26,4)
-  return((gexp[tf[1],]+gexp[tf[2],] -gexp[tf[3],]-gexp[tf[4],] +rnorm(100,sd=3))/2)})))
+  return((gexp[tf[1],]+gexp[tf[2],] -gexp[tf[3],]-gexp[tf[4],] +rnorm(100,sd=0.5))/2)})))
 dimnames(gexp)=list(c(letters,LETTERS),paste("s",1:100,sep=""))
 
 ## Simple example of network inference
 dummyNet=hLICORN(gexp,TFlist = letters)
 
 ## Infer a network only on a subset of genes
-dummyNet=hLICORN(gexp,TFlist = letters,GeneList=c("A","B"))
+subgene = unique(dummyNet@GRN$Target)[1:2]
+dummyNet=hLICORN(gexp,TFlist = letters,GeneList=subgene)
 
 ## Discretize data based on a set of reference samples (here 10 first)
 discexp = discretizeExpressionData(gexp,refSamples=1:10)

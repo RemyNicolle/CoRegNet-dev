@@ -414,200 +414,288 @@ discretizeExpressionData = function(numericalExpression,threshold=NULL,refSample
 
 
 
-hLICORN = function( numericalExpression,discreteExpression=discretizeExpressionData(numericalExpression)
-                    , TFlist, GeneList=setdiff(rownames(numericalExpression),TFlist)  ,
-                    parallel = c("multicore","no", "snow"),cluster=NULL, searchParameters  = c("fast","accurate"),verbose=FALSE)
-{  
-  
-  #######  #######  #######  #######  #######  #######
-  # INPUT VERIFICATION
-  
-  if(  sum(! unique(discreteExpression) %in% -1:1) > 0  ){
-    stop("Discrete expression data should only have values in {-1, 0, 1}")}
-  
-  if(length(rownames(numericalExpression)) > length(unique(rownames(numericalExpression)))){
-    stop("No gene duplicates are allowed in the row.names.")
-  }
-  
-  if(nrow(numericalExpression) != nrow(discreteExpression) |
-       sum(rownames(discreteExpression) != rownames(numericalExpression))>0 ){
-    stop("Discrete expression and continuous expression should have the same dimensions and the same rownames (gene/tf names)") }
-  
-  
-  if(length(intersect(TFlist,rownames(numericalExpression)))<=1 ){
-    stop("At least 2 of the provided regulators/transcription factor (TFlist) should be in the rownames in the gene expression matrix")    }
-  
-  
-  if(ncol(numericalExpression) > nrow(numericalExpression)){
-    warning("Expression data should be in a matrix or data frame with genes in rows and samples in column.")
-  }
-  if(length(intersect(GeneList,rownames(numericalExpression)))==0 ){
-    stop("The list of genes (GeneList) should be in the rownames in the gene expression matrix")    }
-  if(ncol(numericalExpression) >= 2000){
-    stop(paste("Your matrix has more than one thousand samples." ,
-               "Either you have genes in columns, in which case just transpose your data using t(),",
-               "or you really do want to build a network using more than 2000 samples. In the latter case, this version of the package does not support",
-               "such big numbers of samples. However a simple e-mail to remy.nicolle@curie.fr   will quickly do the job and a new version will be posted in very short notice"))
-  }
-  
-  
-  
-  
-  
-  #######  #######  #######  #######  #######  #######
-  
-  if(verbose){
-    print("Pre-process ...")
-  }
-  
-  if(is.character(searchParameters)){
-    searchParameters = match.arg(searchParameters)
-    searchParameters = .getDefaultParameters(searchParameters,ncol(numericalExpression),discreteExpression[intersect(rownames(numericalExpression),TFlist),])
-  }else{
-    searchParameters=.completeParameters(searchParameters,ncol(numericalExpression),discreteExpression[intersect(rownames(numericalExpression),TFlist),])
-  }
-  
-  
-  
-  
-  
-  genesupport = which(apply(abs(discreteExpression), 1 , sum) > (ncol(numericalExpression)*(searchParameters$minGeneSupport)))
-  discreteExpression=discreteExpression[genesupport,]
-  numericalExpression=numericalExpression[genesupport,]
-  TFlist = intersect(rownames(numericalExpression),TFlist)
-  GeneList= intersect(rownames(numericalExpression),GeneList)
-  
-  
-  
-  #the following is to work on fake IDs instead of gene names which can contain annoying characters eg: - @ ...
-  idtogene=intersect( unique(c(GeneList,TFlist)),rownames(numericalExpression))
-  names(idtogene) = paste("A",1:length(idtogene),sep="")
-  genetoid= names(idtogene)
-  names(genetoid) = idtogene
-  numericalExpression=numericalExpression[idtogene,]
-  discreteExpression=discreteExpression[idtogene,]
-  rownames(discreteExpression) = genetoid[rownames(discreteExpression) ]
-  rownames(numericalExpression) = genetoid[rownames(numericalExpression) ]
-  GeneList = genetoid[GeneList]
-  TFlist = genetoid[TFlist]
-  
-  
-  #If only one gene is given, R will automatically make a vector. The following make sure this does not happen.
-  if(length(GeneList)==1){
-    geneNumExp= matrix(numericalExpression[GeneList,],nrow=1)
-    geneDiscExp= matrix(discreteExpression[GeneList,],nrow=1)
-    rownames(geneNumExp)=GeneList
-    rownames(geneDiscExp)=GeneList
-  }else{
-    geneNumExp= numericalExpression[GeneList,]
-    geneDiscExp= discreteExpression[GeneList,]
-  }
-  regNumExp= numericalExpression[TFlist,]
-  regDiscExp= discreteExpression[TFlist,]
-  
-  
-  if(verbose){
-    print("Mine Coregulators ...")
-  }
-  
-  # Mine CoRegulator sets
-  coreg = .mineCoreg(regDiscExp,maxCoreg=searchParameters$maxCoregSize,
-              minGeneSupport=searchParameters$minGeneSupport,minCoregSupport=searchParameters$minCoregSupport)
-  coreg=unique(coreg)
-  if(verbose){    
-    message(paste("Learning a Co-Regulatory network for:\n",  length(GeneList)," target genes, ",length(TFlist)," regulators and a ",
-                  "total of coregulator sets ",length(coreg),"sets of potential co-regulators.\nSearch parameters :\n",
-                  "Maximum size of co-regulator sets : ",searchParameters$maxCoregSize,"\nNumber of putative GRN per gene : ",
-                  searchParameters$nGRN,"\nMinimum number of differentially expressed samples to select a single gene : "
-                  ,searchParameters$minGeneSupport,"\nMinimum number of differentially expressed samples to select a set of co-regulator : "
-                  ,searchParameters$minCoregSupport,collapse=""))
+
+
+hLICORN=function( numericalExpression,discreteExpression=discretizeExpressionData(numericalExpression)
+, TFlist, GeneList=setdiff(rownames(numericalExpression),TFlist),parallel = c("multicore","no", "snow"),cluster=NULL,minGeneSupport=0.1,minCoregSupport = 0.2,maxCoreg=floor(log(ncol(numericalExpression),base=3)),searchThresh=0.5,nGRN=100,verbose=FALSE){
     
-    print("Mining GRN ...")
-  }
-  
-  numscores=c()
-  GRN=c()
-  parallel = match.arg(parallel)
-  gotNet=FALSE
-  
-  result=data.frame()
-  #just because it's easier toadd here 5% and remove it at the first line in the while where it needs to be decrementale in case no GRNs are found
-  searchParameters$threshold =  1/((1/searchParameters$threshold)-1) 
-  
-  # In very large datasets of very heterogeneous samples (such as the large collection of unrelated cell lines ...)
-  # It is possible that no GRN can be fitted with stringent threshold (usually 50%) and that no GRN is found.
-  # In case this happens, the threshold is decremented step by step and if no network is found at 10%, then none can be found ...
-  while(searchParameters$threshold >= 0.1 & !gotNet )
-  {
-    searchParameters$threshold =  1/((1/searchParameters$threshold)+1) 
     
-    if(parallel =="multicore" & length(GeneList)>1 & getOption("mc.cores", 2L) > 1)
+    
+    #######  #######  #######  #######  #######  #######
+    # INPUT VERIFICATION
+    if(  sum(! unique(discreteExpression) %in% -1:1) > 0  ){
+        stop("Discrete expression data should only have values in {-1, 0, 1}")}
+    
+    if(length(rownames(numericalExpression)) > length(unique(rownames(numericalExpression)))){
+        stop("No gene duplicates are allowed in the row.names.")
+    }
+    
+    if(nrow(numericalExpression) != nrow(discreteExpression) |
+    sum(rownames(discreteExpression) != rownames(numericalExpression))>0 ){
+        stop("Discrete expression and continuous expression should have the same dimensions and the same rownames (gene/tf names)") }
+    
+    if(length(intersect(TFlist,rownames(numericalExpression)))<=1 ){
+        stop("At least 2 of the provided regulators/transcription factor (TFlist) should be in the rownames in the gene expression matrix")    }
+    if(ncol(numericalExpression) > nrow(numericalExpression)){
+        warning("Expression data should be in a matrix or data frame with genes in rows and samples in column.")
+    }
+    if(length(intersect(GeneList,rownames(numericalExpression)))==0 ){
+        stop("The list of genes (GeneList) should be in the rownames in the gene expression matrix")    }
+    
+    
+    if(verbose){
+        message("Pre-process.")
+    }
+    
+    
+    # select only genes and TF with ones or minus ones in at least minGeneSupport portion of samples
+    genesupport = which(apply(abs(discreteExpression), 1 , sum) > (ncol(numericalExpression)*(minGeneSupport)))
+    discreteExpression=discreteExpression[genesupport,]
+    numericalExpression=numericalExpression[genesupport,]
+    TFlist = intersect(rownames(numericalExpression),TFlist)
+    GeneList= intersect(rownames(numericalExpression),GeneList)
+    
+    if(length(TFlist)<5){
+        stop("Less than 5 of the provided TF are suitable to infer a network. Either provide more TF, more variations in the discrete dataset (more 1 or -1) or decrease the minGeneSupport parameter to select more but less variant TFs.")
+    }
+    if(length(GeneList)==0){
+        stop("No genes were suitable to infer regulators. Either provide more variations in the discrete dataset (more 1 or -1) or decrease the minGeneSupport parameter to allow the selection of more but less variant Genes.")
+    }
+    
+    
+    # Get all the matrices and datasets needed (gene and tf expression, numerical or discrete)
+    #If only one gene is given, R will automatically make a vector. The following make sure this does not happen.
+    if(length(GeneList)==1){
+        geneNumExp= matrix(numericalExpression[GeneList,],nrow=1)
+        geneDiscExp= matrix(discreteExpression[GeneList,],nrow=1)
+        rownames(geneNumExp)=GeneList
+        rownames(geneDiscExp)=GeneList
+    }else{
+        geneNumExp= numericalExpression[GeneList,]
+        geneDiscExp= discreteExpression[GeneList,]
+    }
+    regNumExp= numericalExpression[TFlist,]
+    regDiscExp= discreteExpression[TFlist,]
+    
+    ##    ##    ##    ##    ##    ##    ##    ##    ##
+    ## TRANSFORMING ALL DISCRETE DATA INTO TRANSACTIONs
+    # To run apriori, the discrete data must be binary. So, the discrete data is simply becoming two concatenated binary matrix
+    # first n samples are positive expression values, then all negative values.
+    posSamples = 1:ncol(discreteExpression)
+    negSamples= (ncol(discreteExpression) +1):(ncol(discreteExpression) *2)
+    regBitData =cbind(regDiscExp==+1 , regDiscExp== -1)
+    transRegBitData= as(t(regBitData),"transactions")
+    
+    if(verbose){
+        message("Mining coregulator ...")
+    }
+    
+    ##    ##    ##    ##    ##    ##    ##    ##    ##
+    ## MINING FOR FREQUENT COREGULATORS
+    # using apriori instead of eclat. testing may be required for possible speed improvement.
+    miningFunction=apriori
+    transitemfreq =suppressWarnings(miningFunction(transRegBitData,parameter=list(support = minGeneSupport/2,maxlen=1,target="frequent itemsets")
+    ,control=list(verbose=FALSE)))
+    if(maxCoreg > 1){
+        transitemfreq=c(transitemfreq,suppressWarnings(miningFunction(transRegBitData,parameter=list(support =minCoregSupport/2,minlen=2,maxlen=maxCoreg,target="closed frequent itemsets")
+        ,control=list(verbose=FALSE))))
+    }
+    coregs =as(slot(transitemfreq,"items"),"list")
+    
+    
+    if(verbose){
+        message(paste("Learning a Co-Regulatory network for:\n",  length(GeneList)," target genes, ",length(TFlist)," regulators and a ",
+        "total of coregulator sets ",length(coregs),"sets of potential co-regulators.\nSearch parameters :\n",
+        "Maximum size of co-regulator sets : ",maxCoreg,"\nNumber of putative GRN per gene : ",
+        nGRN,"\nMinimum number of differentially expressed samples to select a single gene : "
+        ,minGeneSupport,"\nMinimum number of differentially expressed samples to select a set of co-regulator : "
+        ,minCoregSupport,collapse=""))
+        
+        message("Mining GRN ...")
+    }
+    
+    
+    
+    result=data.frame()
+    gotNet=FALSE
+    #just because it's easier toadd here 5% and remove it at the first line in the while loop, where it needs to be decrementale in case no GRNs are found
+    searchThresh=  1/((1/searchThresh)-1)
+    
+    # In very large datasets of very heterogeneous samples (such as the large collection of unrelated cell lines ...)
+    # It is possible that no GRN can be fitted with stringent threshold (usually 50%) and that no GRN is found.
+    # In case this happens, the threshold is decremented step by step and if no network is found at 10%, then none can be found ...
+    while(searchThresh >= 0.05 & !gotNet )
     {
-      result = mclapply(splitlearning(GeneList),.segmentedHLICORN,
-                        coreg=coreg,geneDiscExp=geneDiscExp,genexp=geneNumExp,regnexp=regNumExp
-                        ,nresult=searchParameters$nGRN,ouvertFerme=searchParameters$searchSpace,
-                        threshold=searchParameters$threshold)          
-      gotNet=TRUE
-      
-    }else if(parallel =="snow" & !is.null(cluster) & length(GeneList)>1){
-      
-      result =parLapply(cluster, splitlearning(GeneList), .segmentedHLICORN,
-                        coreg=coreg,geneDiscExp=geneDiscExp,genexp=geneNumExp,regnexp=regNumExp
-                        ,nresult=searchParameters$nGRN,ouvertFerme=searchParameters$openClosed,threshold=searchParameters$threshold)
-      gotNet=TRUE
-    }
-    
-    
-    # If the user does not want to run in parallel or if there is only one gene or none of the abov worked somehow (gotnet)
-    if(parallel =="no" | length(GeneList)>1 | !gotNet){
-      result = lapply(splitlearning(GeneList),.segmentedHLICORN,
-                        coreg=coreg,geneDiscExp=geneDiscExp,genexp=geneNumExp,regnexp=regNumExp
-                        ,nresult=searchParameters$nGRN,ouvertFerme=searchParameters$searchSpace,
-                        threshold=searchParameters$threshold)  
-      
-      gotNet=TRUE
-    }
-    
-    if(length(GeneList)==1 | !gotNet){
-      result =.segmentedHLICORN(GeneList,
-                      coreg=coreg,geneDiscExp=geneDiscExp,genexp=geneNumExp,regnexp=regNumExp
-                      ,nresult=searchParameters$nGRN,ouvertFerme=searchParameters$searchSpace,
-                      threshold=searchParameters$threshold)  
-      result=data.frame(result)
-      gotNet=TRUE
+        # decrements the search threshold in case nothing is found
+        #(can be the case for VERY large datasets for which it can be hard to find regulators with 50% of matching +1 and -1)
+        searchThresh =  1/((1/searchThresh)+1)
+        #running hlicorn for each gene in a multithread way if needed.
+        if(parallel =="multicore" & length(GeneList)>1 & getOption("mc.cores", 2L) > 1)
+        {
+            result =mclapply(GeneList,oneGeneHLICORN,geneDiscExp=geneDiscExp,regDiscExp=regDiscExp,
+            coregs=coregs,transitemfreq=transitemfreq,transRegBitData=transRegBitData,searchThresh=searchThresh,
+            genexp=geneNumExp,regnexp=regNumExp,nresult=nGRN)
+            gotNet=TRUE
+        }else if(parallel =="snow" & !is.null(cluster) & length(GeneList)>1){
+            result =parLapply(cluster,GeneList,oneGeneHLICORN,geneDiscExp=geneDiscExp,regDiscExp=regDiscExp,
+            coregs=coregs,transitemfreq=transitemfreq,transRegBitData=transRegBitData,searchThresh=searchThresh,
+            genexp=geneNumExp,regnexp=regNumExp,nresult=nGRN)
+            gotNet=TRUE
+        }else if( length(GeneList)>1){
+            result =lapply(GeneList,oneGeneHLICORN,geneDiscExp=geneDiscExp,regDiscExp=regDiscExp,
+            coregs=coregs,transitemfreq=transitemfreq,transRegBitData=transRegBitData,searchThresh=searchThresh,
+            genexp=geneNumExp,regnexp=regNumExp,nresult=nGRN)
+            gotNet=TRUE
+        }else{
+            result=oneGeneHLICORN(GeneList,geneDiscExp,regDiscExp,coregs,transitemfreq,transRegBitData,searchThresh ,
+            genexp=geneNumExp,regnexp=regNumExp,nresult=nGRN)
+            gotNet=TRUE
+        }
+        
     }
     #if one of the above call to LICORN worked ... and if the result is a list (neither matrix nor dataframe)
     #  Merge the results into a data.Frame
-    if(      gotNet){  
-      #if needed, like when used in parallel, merge the results into a data.frame
-      if(!is.data.frame(result) & !is.matrix(result)){result= data.frame(do.call(rbind,result))}
-      #if LICORN actually did find some networks ... (meaning at least one GRN)
-      if(ncol(result) >= 3 & nrow(result) >0){
-        # Maybe LICORN did find somes nets, but not enough .. (for less then 5% of the genes)
-        if(length(unique(result$Target)) < (0.05*length(GeneList))){
-          gotNet=FALSE
+    if(      gotNet){
+        #if needed, like when used in parallel, merge the results into a data.frame
+        if(!is.data.frame(result) & !is.matrix(result)){result= data.frame(do.call(rbind,result))}
+        #if LICORN actually did find some networks ... (meaning at least one GRN)
+        if(ncol(result) >= 3 & nrow(result) >0){
+            # Maybe LICORN did find somes nets, but not enough .. (for less then 5% of the genes)
+            if(length(unique(result$Target)) < (0.05*length(GeneList))){
+                gotNet=FALSE
+            }
+        }else{
+            gotNet=FALSE
         }
-      }else{
-        gotNet=FALSE
-      }
-      if(verbose){print(paste("got",nrow(result),"grn"))}
-    }  
+        if(verbose){print(paste("got",nrow(result),"grn"))}
+    }
+    
+    if(verbose){
+        message(paste("adjusted thresh:", searchThresh))
+    }
     
     
+    #When done decrementing the threshold .... well if nothing was found maybe there is a probleme somewhere ...
+    if(nrow(result) ==0 | ncol(result) <3){
+        stop("Something went wrong. No GRN found.")
+    }
+    rownames(result)=NULL
+    sigrns = coregnet(result)
+    sigrns@inferenceParameters=list(minGeneSupport=minGeneSupport,maxCoreg=maxCoreg,minCoregSupport = minCoregSupport,searchThresh=searchThresh,nGRN=nGRN)
+    return(sigrns)
     
-  }
-  
-  
-  #When done decrementing the threshold .... well if nothing was found maybe there is a probleme somewhere ...
-  if(nrow(result) ==0 | ncol(result) <3){
-    stop("Something went wrong. No GRN found.")
-  }
-  result=.remapGRN(result,idtogene)
-  rownames(result)=NULL     
-  sigrns = coregnet(result)    
-  sigrns@inferenceParameters=searchParameters
-  return(sigrns)
+    
 }
+
+
+oneGeneHLICORN = function(g,geneDiscExp,regDiscExp,coregs,transitemfreq,transRegBitData,searchThresh,regnexp,genexp,nresult){
+    shift=ncol(geneDiscExp)
+    #sample index with the target gene at 1 or -1
+    pos =which( geneDiscExp[g,]==1)
+    # negative samples are shifted because we are using a binary matrix with true false for ones in the first part
+    # and true false for -1 in the second part
+    neg=which( geneDiscExp[g,]== -1)+shift
+    
+    # select all the coregulators with a support of 50% minimum only in the samples with the target gene at ones or minus ones
+    coact=coregs[which(support(transitemfreq, transRegBitData[c(pos,neg)])>= searchThresh )]
+    pos =pos+shift
+    neg=neg - shift
+    corep=coregs[which(support(transitemfreq, transRegBitData[c(pos,neg)]) >= searchThresh )]
+    
+    # add empty coregulators to have the possibility to only have ativators or inhibitors
+    corep = c(corep,list(""))
+    coact = c(coact,list(""))
+    
+    # to have unique coregulators and a single vector of coreg (not a list)
+    coactnames =unique(sapply(lapply(coact,sort),paste,collapse=" "))
+    coact=strsplit(coactnames," ")
+    coact[[which(coactnames=="")]]=""
+    corepnames =unique(sapply(lapply(corep,sort),paste,collapse=" "))
+    corep=strsplit(corepnames," ")
+    corep[[which(corepnames=="")]]=""
+    
+    
+    # merge merge expression of coregulator and corepressor
+    coactexp = eand(coact,regDiscExp)
+    corepexp = as.integer(eand(corep,regDiscExp))
+    # active inhibitor has a stronger impact than naything else in licorn:
+    corepexp[which(corepexp ==1)] = 2
+    
+    
+    x= .C("combnLicorn",
+    as.integer(coactexp),as.integer(length(coact)),                     #expression and number of coactivators
+    as.integer(corepexp),as.integer(length(corep)),                     #expression and number of corepressors
+    as.integer(geneDiscExp[g,]),      as.integer(ncol(geneDiscExp)),    #expression of gene, number of samples
+    as.double(rep(-1,(length(coact))*(length(corep)))),             # vector to store MAE results
+    as.integer(rep(-1,(length(coact))*(length(corep)))),            # vector to store index of coactivator
+    as.integer(rep(-1,(length(coact))*(length(corep))))             # vector to store index of corepressor
+    )
+    
+    # bad index will store all bad comparisons (could be done before computing .. right?)
+    # then, no intersection between act and rep (includes both empty
+    goodindex=which(apply(cbind(x[[8]],x[[9]]),1,function(y){
+        return(length(intersect( coact[[y[1]]],corep[[y[2]]] )))
+    })==0)
+    
+    
+    selact = coactnames[x[[8]][goodindex]]
+    selrep = corepnames[x[[9]][goodindex]]
+    
+    # all emty set of coregulators are set to NA
+    selact[which(selact=="")]=NA
+    selrep[which(selrep=="")]=NA
+    
+    mae = x[[7]][goodindex]
+    # get 100 first ranks, if ties, might get more ...
+    bestindex= which(rank(mae,ties.method="min")<=100)
+    GRN = data.frame("Target"=rep(g, length(bestindex)),"coact"=selact[bestindex],   "corep"=selrep[bestindex] ,stringsAsFactors=FALSE)
+    # if no grn are found return NULL
+    if(nrow(GRN)==0){
+        return(NULL)
+    }
+    
+    if(is.matrix(GRN) | is.data.frame(GRN)){
+        linearmodels=.getEntry(apply(GRN,1,.fitGRN,genexp=t(genexp),regexp=t(regnexp),permut=FALSE),"numscores")
+    }else{
+        #    linearmodels=.linearCoregulationBootstrap(as.character(GRN),genexp=gexp,regnexp=regnexp,numBootstrap=numBootstrap)
+        linearmodels=.fitGRN(as.character(GRN),genexp=t(genexp),regexp=t(regnexp),permut=FALSE)$numscores
+    }
+    
+    numscores=data.frame(t(linearmodels),stringsAsFactors = FALSE)
+    
+    numscores[,3]=as.numeric(numscores[,3])
+    numscores[,4]=as.numeric(numscores[,4])
+    numscores[,5]=as.numeric(numscores[,5])
+    numscores[,6]=as.numeric(numscores[,6])
+    colnames(GRN)=c("Target","coact","corep")
+    
+    return(data.frame(GRN,numscores,stringsAsFactors = FALSE))
+    
+}
+
+
+
+eand = function(coact,regDiscExp,multip=1){
+    do.call(rbind,lapply(coact,function(co){
+        if(co[1] == ""){
+            return(rep(0,ncol(regDiscExp)))
+        }else if(length(co) ==1){return(regDiscExp[co,])}
+        n =length(co)
+        x=apply(regDiscExp[co,],2,sum)
+        y=x
+        x[1:length(x)]=0
+        x[which(y== - n )]=- multip
+        x[which(y == n)] = multip
+        return(x)
+    }))
+}
+
+
+
+
+
+
+
 
 
 
