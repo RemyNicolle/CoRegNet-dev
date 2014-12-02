@@ -2,12 +2,16 @@
 title: "CoRegNet : Reconstruction and integrated analysis of Co-Regulatory Networks"
 author: "Remy Nicolle"
 date: 'Decembre 2014'
-output:
-  BiocStyle::html_document
-  vignette: >
+vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{CoRegNet Vignette}
+  %\VignetteIndexEntry{Custom Print Methods}
+output:
+  knitr:::html_vignette:
+    toc: no
 ---
+
+
+
 
 This Vignette accompagnies the _CoRegNet_ package. It can be used either
 to get some additional information about the methods or to get examples
