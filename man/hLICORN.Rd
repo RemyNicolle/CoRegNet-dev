@@ -14,7 +14,7 @@ TFlist, GeneList = setdiff(rownames(numericalExpression), TFlist),
 parallel = c("multicore", "no", "snow"), cluster = NULL,
 minGeneSupport=0.1,minCoregSupport = 0.2,
 maxCoreg=floor(log(ncol(numericalExpression),base=3)),
-searchThresh=0.5,nGRN=100,
+searchThresh=0.5,nGRN=NA,
 verbose=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -67,6 +67,7 @@ Needed only when parallel is set to snow.
  \item{searchThresh}{
 }
  \item{nGRN}{
+  if NA, takes only the best GRN models.
 }
   \item{verbose}{
 Sets wether information will appear in console during computation.

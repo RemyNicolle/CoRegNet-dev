@@ -417,7 +417,7 @@ discretizeExpressionData = function(numericalExpression,threshold=NULL,refSample
 
 
 hLICORN=function( numericalExpression,discreteExpression=discretizeExpressionData(numericalExpression)
-, TFlist, GeneList=setdiff(rownames(numericalExpression),TFlist),parallel = c("multicore","no", "snow"),cluster=NULL,minGeneSupport=0.1,minCoregSupport = 0.2,maxCoreg=floor(log(ncol(numericalExpression),base=3)),searchThresh=0.5,nGRN=100,verbose=FALSE){
+, TFlist, GeneList=setdiff(rownames(numericalExpression),TFlist),parallel = c("multicore","no", "snow"),cluster=NULL,minGeneSupport=0.1,minCoregSupport = 0.2,maxCoreg=floor(log(ncol(numericalExpression),base=3)),searchThresh=0.5,nGRN=NA,verbose=FALSE){
     
     
     
@@ -646,9 +646,16 @@ oneGeneHLICORN = function(g,geneDiscExp,regDiscExp,coregs,transitemfreq,transReg
     selrep[which(selrep=="")]=NA
     
     mae = x[[7]][goodindex]
-    # get 100 first ranks, if ties, might get more ...
-    bestindex= which(rank(mae,ties.method="min")<=100)
-    GRN = data.frame("Target"=rep(g, length(bestindex)),"coact"=selact[bestindex],   "corep"=selrep[bestindex] ,stringsAsFactors=FALSE)
+    if(!is.na(nresult)){
+        # get 100 first ranks, if ties, might get more ...
+        bestindex= which(rank(mae,ties.method="min")<=nresult)
+        GRN = data.frame("Target"=rep(g, length(bestindex)),"coact"=selact[bestindex],   "corep"=selrep[bestindex] ,stringsAsFactors=FALSE)      
+    }else{
+        bestindex= which(rank(mae,ties.method="min")==1)
+        GRN = data.frame("Target"=rep(g, length(bestindex)),"coact"=selact[bestindex],   "corep"=selrep[bestindex] ,stringsAsFactors=FALSE)      
+        
+    }
+  
     # if no grn are found return NULL
     if(nrow(GRN)==0){
         return(NULL)
