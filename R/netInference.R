@@ -165,3 +165,87 @@
     
 }
 
+
+# load("~/workspace/coRegNet/TCGA-bladder/BLCArnaseq.271.RData")
+
+# load("~/workspace/coRegNet/CIT/CITtumsampandNormalsEXP.RData")
+# expression = exp
+# library(CoRegNet)
+# library(parallel)
+# data(HumanTF)
+# TF =HumanTF
+# nThreshQuantile = 100
+# scaled=F
+# verbose=T
+
+
+
+automaticParameters = function(expression,TF,nThreshQuantile = 1000,scaled=FALSE,verbose=FALSE){
+	#work only on TF
+    subtf = expression[intersect(rownames(expression),TF),]
+	# scale expression if not already done
+    if(!scaled){
+        subtf = t(scale(t(subtf),scale=F))
+	}else{
+			 subtf=as.matrix(subtf)
+	}
+	
+    #generate random TF expression
+		#     randomtf = mclapply(1:sampling,function(i){
+		# return(t(apply(subtf,1,function(x){x[sample(1:ncol(subtf))]})))
+		#     })
+	#define several thresholds to test
+	thresholds= quantile(abs(as.vector(subtf)),probs=(1:(nThreshQuantile-1))/nThreshQuantile)
+    nco = ncol(subtf)
+    nro = nrow(subtf)	
+	#for each threshold, compare the random number of pairs in each sample versus the real number of pairs
+	discTests=mclapply(thresholds,function(th){
+		print(th)
+	    realSup=meanSupport(subtf,th,nco,nro)
+		prob= meanSupport(subtf,th,nco,nro,getProb=TRUE)
+		estimeProb = ((prob)^2)*(((nro*(nro -1))/2))*(2*nco)
+		return(c(pnorm(realSup,estimeProb,sqrt(estimeProb)), (realSup-estimeProb)/sqrt(estimeProb) ))
+#		# all this is to compare to random data		
+#	    return(ppois(realSup,estimeProb,lower.tail=F))
+#		if(is.null(realSup)){return(NULL)}
+#		randomSup=unlist(lapply(randomtf,meanSupport,th,nco,nro))
+		#(realSup-mean(randomSup))/sd(randomSup)  Z-score, kind of...
+#		return(c(realSup,estimeProb,max(randomSup),mean(randomSup),sd(randomSup),meanSupport(subtf,th,nco,nro,T)))
+	})
+	discTests=cbind(do.call(rbind,discTests),thresholds)
+	
+	# plot the distribution of the z-score of the number of pairs for each threshold
+	if(verbose){
+		plot(discTests[,3:2],type="l",ylab="z-score",xlab="threshold",main="Deviation from random",
+		sub="blue : standard deviation, green 0.5 and 2 times SD.")
+	    abline(v=sd(subtf),col="green")
+		abline(v=0.5*sd(subtf),col="blue",lty="dotted")
+		abline(v=2*sd(subtf),col="blue",lty="dotted")
+	}
+	
+	discTh = discTests[which.max(discTests[,2]),3]
+	# if the maximum z-score is too high or too low, just return the standard deviation
+	if(discTh > 0.5* sd(subtf) & discTh < 2*sd(subtf)){
+		return(discTh)
+	}else{
+		return(sd(subtf))
+	}
+	
+}
+
+
+#function to compute the mean Support (in the itemset sense, meaning the number of samples with a non zero value)
+# of all pairs of TF given a discretiation threshold
+meanSupport=function(centered,threshold,nco,nro,getMeanSup=F,getProb=F){
+	regBitData = cbind(	matrix(  centered >= threshold   ,nrow=nro,ncol=nco),
+	matrix(  centered <= (-threshold)   ,nrow=nro,ncol=nco))
+	if(getProb){
+		return(sum(regBitData)/(nro* (2*nco)))
+	}
+	if(getMeanSup){
+		return(mean(apply(regBitData,1,sum)))
+	}
+	sum(suppressWarnings(apriori(	as(t(regBitData),"transactions"),parameter=list(support = 10^-100,maxlen=2,minlen=2,target="frequent itemsets")
+    ,control=list(verbose=FALSE)))@quality[,1] * nco*2)#/ ((nro*(nro -1))/2)
+
+}

@@ -417,7 +417,9 @@ discretizeExpressionData = function(numericalExpression,threshold=NULL,refSample
 
 
 hLICORN=function( numericalExpression,discreteExpression=discretizeExpressionData(numericalExpression)
-, TFlist, GeneList=setdiff(rownames(numericalExpression),TFlist),parallel = c("multicore","no", "snow"),cluster=NULL,minGeneSupport=0.1,minCoregSupport = 0.2,maxCoreg=floor(log(ncol(numericalExpression),base=3)),searchThresh=0.5,nGRN=NA,verbose=FALSE){
+, TFlist, GeneList=setdiff(rownames(numericalExpression),TFlist),parallel = c("multicore","no", "snow"),cluster=NULL,
+minGeneSupport=0.1,minCoregSupport = 0.2,maxCoreg=floor(log(ncol(numericalExpression),base=3)),
+searchThresh=0.5,nGRN=NA,verbose=FALSE){
     
     
     
