@@ -1,15 +1,6 @@
-CHANGES in VERSION 1.1.1
+CHANGES in VERSION 1.1.8
 ----------------------
-
-SIGNIFICANT USER-VISIBLE CHANGES
-    
-    o
-
-NEW FEATURES
-
-     o 
-
 
 BUG FIXES
     
-    o
+    o Fixed several errors in particular in the network inference
