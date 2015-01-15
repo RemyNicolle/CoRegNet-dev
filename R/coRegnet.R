@@ -625,8 +625,8 @@ oneGeneHLICORN = function(g,geneDiscExp,regDiscExp,coregs,transitemfreq,transReg
     
     
     x= .C("combnLicorn",
-    as.integer(coactexp),as.integer(length(coact)),                     #expression and number of coactivators
-    as.integer(corepexp),as.integer(length(corep)),                     #expression and number of corepressors
+    as.integer(t(coactexp)),as.integer(length(coact)),                     #expression and number of coactivators
+    as.integer(t(corepexp)),as.integer(length(corep)),                     #expression and number of corepressors
     as.integer(geneDiscExp[g,]),      as.integer(ncol(geneDiscExp)),    #expression of gene, number of samples
     as.double(rep(-1,(length(coact))*(length(corep)))),             # vector to store MAE results
     as.integer(rep(-1,(length(coact))*(length(corep)))),            # vector to store index of coactivator
