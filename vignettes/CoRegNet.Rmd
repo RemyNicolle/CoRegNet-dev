@@ -222,6 +222,7 @@ activated and 10 repressed) in the transcriptional network.
 
 ```{r, eval=FALSE}
     CITinf =regulatorInfluence(grn,CIT_BLCA_EXP)
+
 ```    
 
 
@@ -260,9 +261,11 @@ all pairs of significant TF (FDR 1%).
     head(coregulators(grn))
     #  Coregulators of an ARACNE inferred network
     head(coregulators(CITCoRTN))
+
 ```
     
-    In order to exemplify the use of the proposed analysis tool, additional
+
+In order to exemplify the use of the proposed analysis tool, additional
 data are available through the package : the classification of our
 samples (based on the TCGA classification) and the copy number status of
 the transcription factor in the CIT cohort.
@@ -332,10 +335,14 @@ examples are shown below.
     # Visualizing alterations of the TF
     display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,alterationData=CIT_BLCA_CNV )
 
-    # Visualizing sample classification
-    citclinical=split(CIT_BLCA_Subgroup$samples,CIT_BLCA_Subgroup$subgroup)
+    # Visualizing sample classification using a named factor
+    citclinical=CIT_BLCA_Subgroup$subgroup
+    names(citclinical) =CIT_BLCA_Subgroup$samples
     display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,clinicalData=citclinical)
 
+    # Visualizing sample classification using a list
+    citclinical=split(CIT_BLCA_Subgroup$samples,CIT_BLCA_Subgroup$subgroup)
+    display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,clinicalData=citclinical)
 
     display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,alterationData=CIT_BLCA_CNV,
             clinicalData=citclinical)

@@ -35,6 +35,7 @@ data(HIPPIE_sub)
     \item{\code{CIT_BLCA_EXP}}{A matrix of bladder cancer gene expression from the CIT program. Only contains the 1000 genes with highest standard deviation. rownames : genes, colnames : samples. (from Rebouissou et al. 2014)}
     \item{\code{CIT_BLCA_CNV}}{A matrix of bladder cancer DNA copy number aberrations from the CIT program. Only contains the TF and the tumor samples of \code{CIT_BLCA_EXP}. rownames : TF, colnames : samples.}
   \item{\code{CIT_BLCA_Subgroup}}{A data.frame with sample name in first column and classification from the TCGA in the second column.}
+    \item{\code{CIT_BLCA_smallGRN}}{An example CoRegNet object.}
     \item{\code{ENCODE_sub}}{A data.frame of regulatory interactions from the ENCODE project.}
     \item{\code{CHEA_sub}}{A data.frame of regulatory interactions from the ChEA2 database. (http://amp.pharm.mssm.edu/ChEA2)}
     \item{\code{STRING_sub}}{A data.frame of Protein interaction between TF from the STRING database. (http://string.embl.de)}

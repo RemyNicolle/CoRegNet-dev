@@ -17,9 +17,16 @@ display <- function(coregnetwork,expressionData=NULL,TFA = NULL,alterationData=N
   }
   
   x=coregulators(coregnetwork,alpha = 10^-2)[1:4]
+  if(is.null(nrow(x) )| nrow(x) ==0){
+      stop("No co-regulators in the provided network. If it was inferred with the hLICORN function, try a lower minCoregSupport.")
+  }
   initThreshCoreg=ceiling(0.01*max(x$nGRN))
   maxThreshCoreg = max(x$nGRN)
   x=x[which(x$nGRN >=initThreshCoreg),1:2]
+  if(length( intersect(  unique(unlist( x  )),rownames(TFA)))<5){
+      stop("Too few co-regulators have a measure of influence making the interactive visualization both useless and difficult")
+  }
+  
   assign("SELECTEDCOREG",   intersect(  unique(unlist( x  )),rownames(TFA)), envir = .DisplayEnv)
   TFA=TFA[get("SELECTEDCOREG",envir=.DisplayEnv),]
   
@@ -208,9 +215,9 @@ display <- function(coregnetwork,expressionData=NULL,TFA = NULL,alterationData=N
       observe({
         clicked=input$cy
         output$plot <- renderPlot({
+            
           if(is.null(clicked)[1] ){
-              
-            allTFplot(TFA[intersect(rownames(TFA),get("SELECTEDCOREG",envir=.DisplayEnv)),],clinical=sampleClassif,TFnotes=TFnotes)
+                allTFplot(TFA[intersect(rownames(TFA),get("SELECTEDCOREG",envir=.DisplayEnv)),],clinical=sampleClassif,TFnotes=TFnotes)
           }else if(clicked[1] == "NULL" & length(clicked)<2){
               
             allTFplot(TFA[intersect(rownames(TFA),get("SELECTEDCOREG",envir=.DisplayEnv)),],clinical=sampleClassif,TFnotes=TFnotes)
@@ -219,7 +226,7 @@ display <- function(coregnetwork,expressionData=NULL,TFA = NULL,alterationData=N
             oneTFplot(coreg=coregnetwork,TF=clicked,TFA=TFA,
                       expressionData=expressionData,alteration=alterationData,clinical=sampleClassif)
           }else{
-            allTFplot(TFA[intersect(intersect(rownames(TFA),clicked),get("SELECTEDCOREG",envir=.DisplayEnv)),],clinical=sampleClassif,TFnotes=TFnotes)
+                                                   allTFplot(TFA[intersect(intersect(rownames(TFA),clicked),get("SELECTEDCOREG",envir=.DisplayEnv)),],clinical=sampleClassif,TFnotes=TFnotes)
           }
         },height="auto")
       })
