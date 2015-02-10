@@ -1,7 +1,7 @@
-CHANGES in VERSION 1.1.8
+CHANGES in VERSION 1.1.9
 ----------------------
 
 BUG FIXES
     
     o Several bugs fixed, in particular regarding the network inference algorithm.
-    o Better default parameters in hLICORN
+    o Better default parameters in hLICORN, gives more potential local regulatory networks

@@ -84,11 +84,11 @@ test_hLICORN <-function(){
     ex=matrix(seq(-3,3,length.out=140),ncol=20,dimnames=list(c(letters[1:2],LETTERS[1:5]),paste("sample",1:20,sep="")))
   ex[5:7,] =-0.6*ex[5:7,]
   dummyNet1=hLICORN(ex,TFlist =LETTERS[1:5] )@GRN
-  checkEquals( dummyNet1$Target ,rep(c("a","b"),each=3))
-  checkEquals( dummyNet1$coact ,c("A","B","A B","A","B","A B"))
+  checkEquals( dummyNet1$Target ,rep(c("a","b"),each=7))
+  checkEquals( dummyNet1$coact ,rep(c("A","A","B","B","A B","A B",NA),2))
   #  checkEquals( dummyNet1$corep ,rep( NA,6))
-  checkEqualsNumeric(dummyNet1$R2,rep(1,6),tolerance=1.0e-4)
-  checkEqualsNumeric(dummyNet1$RMSE,rep(0,6),tolerance=1.0e-4)
+  checkEqualsNumeric(dummyNet1$R2,rep(1,14),tolerance=1.0e-4)
+  checkEqualsNumeric(dummyNet1$RMSE,rep(0,14),tolerance=1.0e-4)
   dummyNet2=hLICORN(ex,TFlist =LETTERS[1:5]  ,parallel = "no" )@GRN
   checkEquals(dummyNet1[,1:3],dummyNet2[,1:3])
 }
