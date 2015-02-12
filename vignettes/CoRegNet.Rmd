@@ -42,6 +42,32 @@ illustrate the use of the package.
         head(intersect(rownames(CIT_BLCA_EXP),HumanTF))
 ```
 
+# Quick user guide
+
+Here are the main functionalities of CoRegNet
+
+1. Reconsruct a large-scale regulatory network from gene expression data
+	```
+		GRN = hLICORN(CIT_BLCA_EXP)
+	```
+	
+2. Infer transcription factor activity
+	```
+		influence = regulatorInfluence(GRN,CIT_BLCA_EXP)
+	```
+	
+3. Retrieve inferred co-coregulators
+	```
+		coregs= coregulators(GRN)
+	```
+	
+4. Analyze the network of cooperative regulators using an interactive display
+	```
+		display(GRN,CIT_BLCA_EXP,influence)
+	```
+
+
+Each of these steps are more
 
 # Construction of a large scale co-regulatory network from gene expression data
 

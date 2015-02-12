@@ -287,7 +287,9 @@ setMethod("coregulators", signature(object = "coregnet"), function(object,maxcor
                       minCommonGenes=ifelse(maxcoreg==2,1,10),adjustMethod="fdr",alpha=0.01) {
   grn=object@GRN
   if(length(grep(" ",grn$coact)) ==0 &length(grep(" ",grn$corep))==0){
-    warning("No natural co-regulators found in the network. Only pairs will be returned.")
+    warning(paste("No natural co-regulators found in the network.",
+	"This either means that the network was inferred with another methods or that there is insufficient evidences to infer significant co-regulators." 
+	,"Only pairs will be returned.")
     maxcoreg=2
   }
   
