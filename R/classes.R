@@ -289,7 +289,7 @@ setMethod("coregulators", signature(object = "coregnet"), function(object,maxcor
   if(length(grep(" ",grn$coact)) ==0 &length(grep(" ",grn$corep))==0){
     warning(paste("No natural co-regulators found in the network.",
 	"This either means that the network was inferred with another methods or that there is insufficient evidences to infer significant co-regulators." 
-	,"Only pairs will be returned.")
+	,"Only pairs will be returned."))
     maxcoreg=2
   }
   
