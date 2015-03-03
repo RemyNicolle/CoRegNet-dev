@@ -21,12 +21,12 @@ package maintainer (remy.c.nicolle at gmail dot com).
 
 # Introduction
 
-The _CoRegNet_ package aims at inferred a large scale transcription
-co-regulatory network from transcriptomic data, integrate external data
+The _CoRegNet_ package aims at inferring a large scale transcription
+co-regulatory network from transcriptomic data and at integrating external data
 on gene regulation to infer and analyse transcriptional programs. The
 particularity of the network inference algorithm proposed in the package
-is to learn co-regulation netwok in which the regulation is modeled by
-transcription factors which act in a cooperative manner to
+is to learn co-regulation netwok in which gene regulation is modeled by
+transcription factors acting in a cooperative manner to
 synergistically regulate target genes.
 
 The package was used in a study of Bladder Cancer to identify the driver
@@ -36,7 +36,7 @@ illustrate the use of the package.
 
 ```{r, eval=FALSE}
         library(CoRegNet)
-        data(CIT_BLCA_EXP,HumanTF)
+        data(CIT_BLCA_EXP,HumanTF,CIT_BLCA_Subgroup)
         dim(CIT_BLCA_EXP)
         #showing 6 first TF in the gene expression dataset
         head(intersect(rownames(CIT_BLCA_EXP),HumanTF))
@@ -47,23 +47,23 @@ illustrate the use of the package.
 Here are the main functionalities of CoRegNet
 
 1. Reconsruct a large-scale regulatory network from gene expression data
-	```
-		GRN = hLICORN(CIT_BLCA_EXP)
+	```{r, eval=FALSE}
+		GRN = hLICORN(CIT_BLCA_EXP, TFlist=HumanTF)
 	```
 	
 2. Infer transcription factor activity
-	```
+	```{r, eval=FALSE}
 		influence = regulatorInfluence(GRN,CIT_BLCA_EXP)
 	```
 	
 3. Retrieve inferred co-coregulators
-	```
+	```{r, eval=FALSE}
 		coregs= coregulators(GRN)
 	```
 	
 4. Analyze the network of cooperative regulators using an interactive display
-	```
-		display(GRN,CIT_BLCA_EXP,influence)
+	```{r, eval=FALSE}
+		display(GRN,CIT_BLCA_EXP,influence,clinicalData=CIT_BLCA_Subgroup)
 	```
 
 
@@ -85,12 +85,15 @@ regulatory network for each gene.
 
 
 The minimal input datasets is :
-* a gene expression data.frame or
-matrix with unique column and row names containing sample and gene names
+
+- a gene expression data.frame or
+matrix with unique column names and row names containing sample and gene names
 respectively 
-* a list of genes to be considered as Transcription factor
+
+- a list of genes to be considered as Transcription factor
 (TF). The package contains a default list of TF either in the form of
-official gene symbol or EntrezGene IDs.
+official gene symbol ( _data(HumanTF)_ ) or EntrezGene IDs ( _data(HumanTF\_entrezgene)_ ).
+
 
 ```{r, eval=FALSE}
     # An example of how to infer a co-regulation network
@@ -143,10 +146,10 @@ package (default in R >= 3.0), which itself uses 2 cores by default.
 
 
 
-Although H-LICORN is an inference algorithm which is particularly
+Although LICORN is an inference algorithm which is particularly
 efficient in identifying co-regulators, that is cooperative
-transcription factor, the package allows to input a regulatory network
-inferred by other methods or even experimentally defined.
+transcription factors, the package allows to input a regulatory network
+inferred by other methods or defined by high-throughput biological experiments.
 
 
 # Refining the inferred regulatory networks
@@ -285,9 +288,6 @@ all pairs of significant TF (FDR 1%).
 ```{r, eval=FALSE}
     # Coregulators of a hLICORN  inferred network
     head(coregulators(grn))
-    #  Coregulators of an ARACNE inferred network
-    head(coregulators(CITCoRTN))
-
 ```
     
 
@@ -358,20 +358,11 @@ examples are shown below.
     # Visualizing additional regulatory or co-regulatory evidences in the network
     display(enrichedGRN,expressionData=CIT_BLCA_EXP,TFA=CITinf)
 
-    # Visualizing alterations of the TF
-    display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,alterationData=CIT_BLCA_CNV )
 
     # Visualizing sample classification using a named factor
-    citclinical=CIT_BLCA_Subgroup$subgroup
-    names(citclinical) =CIT_BLCA_Subgroup$samples
-    display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,clinicalData=citclinical)
+    display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,clinicalData=CIT_BLCA_Subgroup)
 
-    # Visualizing sample classification using a list
-    citclinical=split(CIT_BLCA_Subgroup$samples,CIT_BLCA_Subgroup$subgroup)
-    display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,clinicalData=citclinical)
-
-    display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,alterationData=CIT_BLCA_CNV,
-            clinicalData=citclinical)
+   
 ```
 
 

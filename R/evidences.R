@@ -174,6 +174,10 @@
       net=net[which(net[,1] %in% commonreg & net[,2] %in%  commongenes),1:2]
       
       evg=igraph::graph.data.frame(ev)
+      if(vcount(evg)==0){
+          return(c(length(commongenes),length(commonreg),NA,NA,NA ,NA))
+      }
+      
       g=igraph::graph.data.frame(net)
       n21=length(igraph::E(igraph::graph.difference(evg, g)))
       n12=length(igraph::E(igraph::graph.difference(g,evg )))
@@ -191,6 +195,9 @@
       TF = intersect(igraph::V(g)$name,alltfs)
       subg=igraph::induced.subgraph(g, which(V(g)$name %in%TF))
       subcoreg=igraph::induced.subgraph(coregG, which(igraph::V(coregG)$name %in%TF))
+      if(vcount(subcoreg)==0){
+          return(c(NA,length(TF),NA,NA,NA ,NA))
+      }
       
       n11=length(igraph::E(igraph::graph.intersection(subcoreg,subg)))    
       n21=length(igraph::E(igraph::graph.difference(subg, subcoreg)))   

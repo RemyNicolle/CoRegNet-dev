@@ -444,6 +444,7 @@ searchThresh=1/3,nGRN=100,verbose=FALSE){
     if(length(intersect(GeneList,rownames(numericalExpression)))==0 ){
         stop("The list of genes (GeneList) should be in the rownames in the gene expression matrix")    }
     
+    parallel <- match.arg(parallel)
     
     if(verbose){
         message("Pre-process.")
