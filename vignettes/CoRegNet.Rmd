@@ -1,7 +1,7 @@
 ---
 title: "CoRegNet : Reconstruction and integrated analysis of Co-Regulatory Networks"
 author: "Remy Nicolle"
-date: 'Decembre 2014'
+date: 'march 2015'
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Custom Print Methods}
@@ -48,22 +48,22 @@ Here are the main functionalities of CoRegNet
 
 1. Reconsruct a large-scale regulatory network from gene expression data
 	```{r, eval=FALSE}
-		GRN = hLICORN(CIT_BLCA_EXP, TFlist=HumanTF)
+		grn = hLICORN(CIT_BLCA_EXP, TFlist=HumanTF)
 	```
 	
 2. Infer transcription factor activity
 	```{r, eval=FALSE}
-		influence = regulatorInfluence(GRN,CIT_BLCA_EXP)
+		influence = regulatorInfluence(grn,CIT_BLCA_EXP)
 	```
 	
 3. Retrieve inferred co-coregulators
 	```{r, eval=FALSE}
-		coregs= coregulators(GRN)
+		coregs= coregulators(grn)
 	```
 	
 4. Analyze the network of cooperative regulators using an interactive display
 	```{r, eval=FALSE}
-		display(GRN,CIT_BLCA_EXP,influence,clinicalData=CIT_BLCA_Subgroup)
+		display(grn,CIT_BLCA_EXP,influence,clinicalData=CIT_BLCA_Subgroup)
 	```
 
 
@@ -255,7 +255,7 @@ activated and 10 repressed) in the transcriptional network.
 ```    
 
 
-    This new dataset of transcriptional influence can be used as a condensed
+This new dataset of transcriptional influence can be used as a condensed
 view of the whole transcriptome dataset. Data mining and machine
 learning can be applied to it to identify clusters, predict sample
 classes or extracting relevant features. More interestingly, it can be
@@ -362,6 +362,9 @@ examples are shown below.
     # Visualizing sample classification using a named factor
     display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,clinicalData=CIT_BLCA_Subgroup)
 
+    # Visualizing copy number alteration of regulators
+    data(CIT_BLCA_CNV)
+    display(grn,expressionData=CIT_BLCA_EXP,TFA=CITinf,clinicalData=CIT_BLCA_Subgroup,alterationData=CIT_BLCA_CNV)
    
 ```
 

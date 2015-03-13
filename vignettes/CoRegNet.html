@@ -53,7 +53,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <div id="header">
 <h1 class="title">CoRegNet : Reconstruction and integrated analysis of Co-Regulatory Networks</h1>
 <h4 class="author"><em>Remy Nicolle</em></h4>
-<h4 class="date"><em>Decembre 2014</em></h4>
+<h4 class="date"><em>march 2015</em></h4>
 </div>
 
 
@@ -73,13 +73,13 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p>Here are the main functionalities of CoRegNet</p>
 <ol style="list-style-type: decimal">
 <li><p>Reconsruct a large-scale regulatory network from gene expression data</p>
-<pre class="sourceCode r"><code class="sourceCode r">    GRN =<span class="st"> </span><span class="kw">hLICORN</span>(CIT_BLCA_EXP, <span class="dt">TFlist=</span>HumanTF)</code></pre></li>
+<pre class="sourceCode r"><code class="sourceCode r">    grn =<span class="st"> </span><span class="kw">hLICORN</span>(CIT_BLCA_EXP, <span class="dt">TFlist=</span>HumanTF)</code></pre></li>
 <li><p>Infer transcription factor activity</p>
-<pre class="sourceCode r"><code class="sourceCode r">    influence =<span class="st"> </span><span class="kw">regulatorInfluence</span>(GRN,CIT_BLCA_EXP)</code></pre></li>
+<pre class="sourceCode r"><code class="sourceCode r">    influence =<span class="st"> </span><span class="kw">regulatorInfluence</span>(grn,CIT_BLCA_EXP)</code></pre></li>
 <li><p>Retrieve inferred co-coregulators</p>
-<pre class="sourceCode r"><code class="sourceCode r">    coregs=<span class="st"> </span><span class="kw">coregulators</span>(GRN)</code></pre></li>
+<pre class="sourceCode r"><code class="sourceCode r">    coregs=<span class="st"> </span><span class="kw">coregulators</span>(grn)</code></pre></li>
 <li><p>Analyze the network of cooperative regulators using an interactive display</p>
-<pre class="sourceCode r"><code class="sourceCode r">    <span class="kw">display</span>(GRN,CIT_BLCA_EXP,influence,<span class="dt">clinicalData=</span>CIT_BLCA_Subgroup)</code></pre></li>
+<pre class="sourceCode r"><code class="sourceCode r">    <span class="kw">display</span>(grn,CIT_BLCA_EXP,influence,<span class="dt">clinicalData=</span>CIT_BLCA_Subgroup)</code></pre></li>
 </ol>
 <p>Each of these steps are more</p>
 </div>
@@ -151,8 +151,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h1>Identification of active transcriptional programs</h1>
 <p>The goal of the <em>CoRegNet</em> package is to identify the sets of active cooperative TF in a given sample or set of samples. A measure of transcriptional activity was developed to estimate the level of activity of given transcription regulator in a given sample. This measure, termed the influence, is the comparison the expression of the activated and repressed genes of a TF in a transcriptional network. It is based on a measure of divergence (welch’s t statistics) of these two sets of genes in one sample. Basically, if the genes activated by a TF are highly expressed while the repressed genes are under-expressed, the TF has a high influence. Using a coregulatory network encoded in a <em>coregnet</em><br />object and a matrix of gene expression, wether it is the data use for the inference or another one (cell lines transcriptomes for instance). The output is a matrix with the same number of columns (samples) and as many rows (TF) as TF with a sufficient number of targets (min 10 activated and 10 repressed) in the transcriptional network.</p>
 <pre class="sourceCode r"><code class="sourceCode r">    CITinf =<span class="kw">regulatorInfluence</span>(grn,CIT_BLCA_EXP)</code></pre>
-<pre><code>This new dataset of transcriptional influence can be used as a condensed</code></pre>
-<p>view of the whole transcriptome dataset. Data mining and machine learning can be applied to it to identify clusters, predict sample classes or extracting relevant features. More interestingly, it can be used to visualize the entire dataset with a much smaller number of feature making heatmaps a sufficient tools to evualuate all samples. The package proposes a visualization tool based on an interactive shiny webpage. The objective of the embeded visualization tool is to navigate the transcriptional programs through the network of cooperative transcription factors and identify the specific transcriptional program of a sample or a set of samples defined by a clinical subgroup.</p>
+<p>This new dataset of transcriptional influence can be used as a condensed view of the whole transcriptome dataset. Data mining and machine learning can be applied to it to identify clusters, predict sample classes or extracting relevant features. More interestingly, it can be used to visualize the entire dataset with a much smaller number of feature making heatmaps a sufficient tools to evualuate all samples. The package proposes a visualization tool based on an interactive shiny webpage. The objective of the embeded visualization tool is to navigate the transcriptional programs through the network of cooperative transcription factors and identify the specific transcriptional program of a sample or a set of samples defined by a clinical subgroup.</p>
 <p>Preliminary to the analysis of transcriptional program is the identification of the network of co-regulators underlying these programs. The definition of a pair of cooperative TF or co-regulator is dependent on the method used to construct the network, that is, wether it contains simple pairs of regulation (TF -&gt; Gene, inferred using the ARACNE algorithm for instance) or sets of cooperative TF regulating each gene ({TF1,TF2,…} -&gt; Gene, inferred using the LICORN algorithm). From the pair regulatory network, all combination of TF sharing at least one target gene is considered as a potential pair of co-regulator. From the cooperative network, these are defined by all pairs of TF which were inferred to be cooperative in the regulation of at least one target gene. Then, the significance of these pairs is tested using fisher’s exact test to assess wether these pairs of TF share more target genes than expected by chance (Benjamini-Hochberg multi test correction is applied). The final co-regulation network is defined by an edge between all pairs of significant TF (FDR 1%).</p>
 <pre class="sourceCode r"><code class="sourceCode r">    <span class="co"># Coregulators of a hLICORN  inferred network</span>
     <span class="kw">head</span>(<span class="kw">coregulators</span>(grn))</code></pre>
@@ -173,7 +172,11 @@ code > span.er { color: #ff0000; font-weight: bold; }
     <span class="kw">display</span>(enrichedGRN,<span class="dt">expressionData=</span>CIT_BLCA_EXP,<span class="dt">TFA=</span>CITinf)
 
     <span class="co"># Visualizing sample classification using a named factor</span>
-    <span class="kw">display</span>(grn,<span class="dt">expressionData=</span>CIT_BLCA_EXP,<span class="dt">TFA=</span>CITinf,<span class="dt">clinicalData=</span>CIT_BLCA_Subgroup)</code></pre>
+    <span class="kw">display</span>(grn,<span class="dt">expressionData=</span>CIT_BLCA_EXP,<span class="dt">TFA=</span>CITinf,<span class="dt">clinicalData=</span>CIT_BLCA_Subgroup)
+
+    <span class="co"># Visualizing copy number alteration of regulators</span>
+    <span class="kw">data</span>(CIT_BLCA_CNV)
+    <span class="kw">display</span>(grn,<span class="dt">expressionData=</span>CIT_BLCA_EXP,<span class="dt">TFA=</span>CITinf,<span class="dt">clinicalData=</span>CIT_BLCA_Subgroup,<span class="dt">alterationData=</span>CIT_BLCA_CNV)</code></pre>
 <p><em>N.B.</em> : the Cytoscape network snapshot is experimental and usually is one snapshot late. Usually going back and forth to the snapshot tab once or twice should do the trick to have the latest snapshot. Hopefully this will be corrected by the Cytoscape.JS team.</p>
 <hr />
 </div>

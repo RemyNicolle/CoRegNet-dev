@@ -2,8 +2,8 @@ Package: CoRegNet
 Type: Package
 Title: CoRegNet : reconstruction and integrated analysis of co-regulatory
 	networks
-Version: 1.1.11
-Date: 2015-01-28
+Version: 1.1.2
+Date: 2015-03-13
 Author: Remy Nicolle, Thibault Venzac and Mohamed Elati
 Maintainer: Remy Nicolle <remy.c.nicolle@gmail.com>
 Description: This package provides methods to identify active
