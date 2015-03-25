@@ -1,0 +1,22 @@
+body {
+	font: 14pt Helvetica Neue, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	overflow: hidden;
+}
+
+#cy {
+	height: 350px;
+	width: 100%;
+    left: 10;
+    top: 10;
+    border: 1px solid #ddd;
+	margin: 1em 0;
+}
+
+#plot{height:50%;}
+
+
+html{overflow:scroll;
+    overflow-y:auto;
+}
+
