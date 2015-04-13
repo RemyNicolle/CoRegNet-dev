@@ -25,13 +25,13 @@ The _CoRegNet_ package aims at inferring a large scale transcription
 co-regulatory network from transcriptomic data and at integrating external data
 on gene regulation to infer and analyze transcriptional programs. The
 particularity of the network inference algorithm proposed in the package
-is to learn co-regulation network in which gene regulation is modeled by
+is to learn a co-regulation network in which gene regulation is modeled by
 transcription factors acting in a cooperative manner to
 synergistically regulate target genes.
 
 The package was used in a study of Bladder Cancer to identify the driver
 transcriptional programs from a set of 183 samples. Throughout this
-Vignette, a smaller version of the transcriptomic dataset is used to
+Vignette, a smaller version of this transcriptomic dataset is used to
 illustrate the use of the package.
 
 ```{r, eval=FALSE}
@@ -44,7 +44,7 @@ illustrate the use of the package.
 
 # Quick user guide
 
-Here are the main functionalities of _CoRegNet_
+Here are the main functionalities of _CoRegNet_:
 
 1. Reconstruct a large-scale regulatory network from gene expression data
 	```{r, eval=FALSE}
@@ -56,7 +56,7 @@ Here are the main functionalities of _CoRegNet_
 		influence = regulatorInfluence(grn,CIT_BLCA_EXP)
 	```
 	
-3. Retrieve inferred co-coregulators
+3. Retrieve inferred co-regulators
 	```{r, eval=FALSE}
 		coregs= coregulators(grn)
 	```
@@ -73,18 +73,18 @@ Here are the main functionalities of _CoRegNet_
 
 
 The inference algorithm implemented in the package is a hybrid version
-of the LICORN algorithm. It is both based on a discrete and continuous
+of the *LICORN* algorithm. It is both based on a discrete and continuous
 version of the gene expression data. The reconstruction of the network
 involves 4 steps. First, the gene expression data is discretized.
 Second, all the potential sets of cooperative regulators are extracted
 using the *apriori* algorithm of frequent itemset mining. Third, the
 best combinations of co-activators and co-inhibitors are identified for
 each gene. Finally, a continuous model of regulation using a linear
-regression method with interaction terms is used to score the local gene
+regression model with interaction terms is used to score the local gene
 regulatory networks of each gene.
 
 
-The minimal input datasets is:
+The minimal input data is:
 
 - a gene expression data.frame or
 matrix with unique column names and row names respectively containing sample and gene names
@@ -106,13 +106,13 @@ The transcriptomic dataset is by default discretized using the
 _discretizeExpressionData_ function. This function can be used to discretize
 gene expression data with or without a set of reference samples, 
 such as healthy samples in the case of the study of a disease.
-In both cases, the expression of genes is centered either towards the mean expression of all samples when no reference samples are given or towards the mean of the set of reference samples. Note that the expression is not scaled to obtain a unitary standard deviation.
+In both cases, the expression of each gene is centered, either towards the mean expression of all samples when no reference samples are given, or towards the mean of the set of reference samples. Note that the expression is not scaled to obtain a unitary standard deviation.
 Generally, even when reference samples are available, centering gene expression on the mean of all experiments performs well, especially on large datasets.
 The expression values are then set to +1 when it exceeds a given threshold or to -1 when it goes below a given threshold or to 0 otherwise.
-The choice of the threshold is either user defined or computed based on the overall distribution of the dataset.
+The choice of the threshold is either user-defined or computed based on the overall distribution of the dataset.
 
-Moreover, any discretized data can be used as an input, as long as the discretized matrix has similar dimensions and dimension names than the continuous expression data.
-For instance,  a mixture of Gaussian can be fitted to each gene to
+Moreover, any discretized data can be used as an input, as long as the discretized matrix has identical dimensions and dimension names to the continuous expression data.
+For instance,  a mixture of Gaussians can be fitted to each gene to
 identify samples in which a given gene is over-expressed,
 under-expressed or does not change.
 
@@ -153,18 +153,18 @@ package (default in R >= 3.0), which itself uses 2 cores by default.
 
 
 Although _hLICORN_ is an inference algorithm that is particularly
-efficient in identifying co-regulators, _e.g._ cooperative
+efficient in identifying co-regulators, _i.e._ cooperative
 transcription factors, the package allows the input of a regulatory network
 inferred by other methods or defined by high-throughput biological experiments for the rest of the analysis.
 
 
-# Refining the inferred regulatory networks
+# Refining the inferred regulatory network
 
 The second step of the analysis uses external knowledge to enrich the
 inferred regulatory network. Two types of external data can be used:
-regulatory information such as Transcription Factor Binding Sites (TFBS)
+regulatory data such as Transcription Factor Binding Sites (TFBS)
 or ChIP data to support TF to gene interactions and co-regulatory
-information such as protein-protein interaction to support cooperative
+data such as protein-protein interaction to support cooperative
 TFs. These datasets can be easily integrated in a *coregnet* object using
 two functions: _addEvidences_ and _addCooperativeEvidences_.
 
@@ -189,7 +189,7 @@ two functions: _addEvidences_ and _addCooperativeEvidences_.
 
 The *coregnet* object with added evidences contains a statistical
 analysis of the enrichment of the inferred interactions in the validated
-external evidences using a fisher exact test as exemplified below.
+external evidences using Fisher's exact test as exemplified below.
 
 ```{r, eval=FALSE}
     print(enrichedGRN)
@@ -198,13 +198,12 @@ external evidences using a fisher exact test as exemplified below.
 
 The added evidences can be used to refine the inferred network and
 select local gene regulatory networks. 
-This is done based on the work of the _modEncode_ consortium
+This is based on the work of the _modEncode_ consortium
 which proposed a method to integrate orthogonal datasets (transcriptome,
-epigenetic marks, binding sites, ...) to learn a global network.
-Briefly, for each dataset, the method assigns one score to all possible
-interactions. The final score of each interaction merges
-each individual dataset score to select the best regulatory interactions. Here,
-instead of scoring and selecting single edges, the methods is extended
+epigenetic marks, binding sites, ...) in order to learn a global network.
+Briefly, for each dataset, the method assigns one score to all
+inferred interactions. The interactions are then selected based on a final score merging the ones assigned by each dataset. Here,
+instead of scoring and selecting single edges, the method is extended
 to work with local regulatory networks (sets of co-activators and
 co-inhibitors of a given gene). For each dataset, a score is assigned to
 each local network by counting the number of validated interactions
@@ -217,7 +216,7 @@ was shown by the modENCODE consortium to give the best results. The
 supervised method uses a user defined reference dataset as a reference
 set of interactions. A Generalized Linear Model is then used to predict
 the presence of a reference interaction based on the score of the other
-datasets including the network inference score.
+datasets including the network inference score. 
 
 ```{r, eval=FALSE}
         # Default unsupervised refinement method
@@ -232,7 +231,7 @@ datasets including the network inference score.
 _N.B._: It is possible to use the results of other network inference methods
 and integrate them into a *coregnet* network object as
 external regulatory evidences.
-However, the integration of co-regulatory evidences 
+However, for the integration of co-regulatory evidences, this is only
 relevant when using networks containing cooperative regulators instead of simple TF to gene
 interaction pairs.
 
@@ -240,7 +239,7 @@ interaction pairs.
 # Identification of active transcriptional programs
 
 The goal of the _CoRegNet_ package is to identify the sets of active
-cooperative TF in a given sample or set of samples. A measure of
+cooperative TFs in a given sample or set of samples. A measure of
 transcriptional activity was developed to estimate the level of activity
 of a given transcription regulator in a given sample. This measure,
 the _influence_, is the comparison the expression of the activated and
@@ -248,12 +247,12 @@ repressed genes of a TF in a transcriptional network. It is based on a
 measure of divergence (Welch's t statistics) of these two sets of genes
 in one sample. Basically, if the genes activated by a TF are highly
 expressed while the repressed genes are under-expressed, the TF has a
-high influence. Using a coregulatory network encoded in a *coregnet*    
-object and a matrix of gene expression, whether it is the data used for
-the inference or another one (cell lines transcriptomes for instance).
+high influence. The method uses a co-regulatory network encoded in a *coregnet*    
+object and a matrix of gene expression, whether it is the same data used for
+the inference or another one (cell lines of the same tissue for instance).
 The output is a matrix with the same number of columns (samples) and as
-many rows (TF) as TF with a sufficient number of targets (min 10
-activated and 10 repressed) in the transcriptional network.
+many rows (TF) as TF with a sufficient number of targets (default set to a minimum of 10
+activated and 10 repressed genes) in the transcriptional network.
 
 ```{r, eval=FALSE}
     CITinf =regulatorInfluence(grn,CIT_BLCA_EXP)
@@ -267,28 +266,28 @@ learning algorithms can be applied to it to identify clusters, predict sample
 classes or extract relevant features. More interestingly, it can be
 used to visualize the entire dataset with a much smaller number of
 features. The
-package proposes a visualization tool based on an interactive shiny
+package proposes a visualization tool based on an interactive Shiny
 webpage. The objective of the embedded visualization tool is to navigate through 
 the transcriptional programs using the network of cooperative
 transcription factors and identify the specific transcriptional program
-of a sample or a set of samples defined by a subgroup of interest.
+of a sample or a set of samples of interest.
 
 Preliminary to the analysis of transcriptional program is the
 identification of the network of co-regulators underlying these
 programs. The definition of a pair of cooperative TF or co-regulator is
 dependent on the method used to construct the network, that is, whether
 it contains simple pairs of regulation (TF -> Gene, inferred using the
-ARACNE algorithm for instance) or sets of cooperative TF regulating each
-gene ({TF1, TF2, ...} -> Gene, inferred using the _hLICORN_ algorithm embedded in the package). From
-the pair regulatory network, all combination of TF sharing at least one
-target gene is considered as a potential pair of co-regulator. From the
+ARACNE algorithm for instance) or sets of cooperative TFs regulating each
+gene ({TF1, TF2, ...} -> Gene). From
+the 'pair' regulatory network (TF->Gene), all combinations of TFs sharing at least one
+target gene is considered as a potential pair of co-regulators. From the
 cooperative network, these are defined by all pairs of TF which were
 inferred to be cooperative in the regulation of at least one target
-gene. Then, the significance of these pairs is tested using fisher's
-exact test to assess whether these pairs of TF share more target genes
-than expected by chance (Benjamini-Hochberg multi test correction is
-applied). The final co-regulation network is defined by an edge between
-all pairs of significant TF (FDR 1%).
+gene. Then, the significance of these pairs is tested using Fisher's
+exact test to assess whether these pairs of TFs share more target genes
+than expected by chance (Benjamini-Hochberg multitest correction is
+applied). The final co-regulation network is defined by setting an edge between
+all pairs of significant TFs (FDR 1%).
 
 
 ```{r, eval=FALSE}
@@ -297,10 +296,10 @@ all pairs of significant TF (FDR 1%).
 ```
     
 
-In order to exemplify the use of the proposed analysis tool, additional
-data are available through the package: the classification of our
+In order to exemplify the use of the proposed tool, additional
+datasets are available through the package: the classification of our
 samples (based on the TCGA classification) and the copy number status of
-the transcription factor in the CIT cohort.
+the transcription factors in the CIT cohort.
   
  
 ```{r, eval=FALSE}
@@ -324,8 +323,7 @@ The top left part of the shiny application is used to change several
 parameters of the application.
 
 
-The first selection input is usable only if a sample classification is
-available. When a particular subgroup is selected, the nodes representing TF will adapt their color based on
+The first selection input relates to the sample classification. When a particular subgroup is selected, the nodes representing TFs will adapt their color based on
 their mean activity level in the selected set of samples. If alteration
 data is available, the pie chart inside each node will by modified to
 show the proportion of each copy number status in the selected set of
@@ -373,7 +371,7 @@ examples are shown below.
 
 
 _N.B._: the Cytoscape network snapshot is experimental and usually is
-one snapshot late. Usually going back and forth to the snapshot tab once
+one snapshot late. Going back and forth to the snapshot tab once
 or twice should do the trick to have the latest snapshot. Hopefully this
 will be corrected by the Cytoscape.JS team.
 
@@ -384,7 +382,7 @@ will be corrected by the Cytoscape.JS team.
 
 
 
-The following contains snapshots of the shiny interactive user interface for the visualization of a co-regulatory network driving  bladder cancer.
+The following contains snapshots of the shiny interactive user interface for the visualization of a co-regulatory network driving bladder cancer.
 
 
 The Co-regulation page is divided in three parts (see figure 1).
