@@ -54,7 +54,7 @@
     # count for each grn the number of known evidences and normalize.
     evcount = .parallelRegulationEvidence(geneRegulatoryNetwork@GRN,  evlist)
     if(sum(evcount) == 0){
-        print(paste("No evidence from",evname,"were found in the inferred network."))
+        message(paste("No evidence from",evname,"were found in the inferred network."))
         return(NULL)
     }
     geneRegulatoryNetwork@GRN=data.frame(geneRegulatoryNetwork@GRN,evcount)
