@@ -1,6 +1,6 @@
 ---
 title: "CoRegNet: Reconstruction and integrated analysis of Co-Regulatory Networks"
-author: "Remy Nicolle, François Radvanyi and Mohamed Elati"
+author: "Remy Nicolle, Francois Radvanyi and Mohamed Elati"
 date: 'march 2015'
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
