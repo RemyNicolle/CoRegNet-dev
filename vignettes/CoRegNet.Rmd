@@ -1,10 +1,6 @@
 ---
 title: "CoRegNet: Reconstruction and integrated analysis of Co-Regulatory Networks"
-<<<<<<< HEAD
 author: "Remy Nicolle, Francois Radvanyi and Mohamed Elati"
-=======
-author: "Remy Nicolle, Francois Radvanyi and Mohamed Elati"
->>>>>>> 1c559e22727feccd36b5b401b871b6166093d934
 date: 'march 2015'
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
@@ -247,7 +243,7 @@ The goal of the _CoRegNet_ package is to identify the sets of active
 cooperative TF in a given sample or set of samples. A measure of
 transcriptional activity was developed to estimate the level of activity
 of a given transcription regulator in a given sample. This measure,
-the _influence_, is the comparison the expression of the activated and
+the _influence_, is the comparison of the expression of the activated and
 repressed genes of a TF in a transcriptional network. It is based on a
 measure of divergence (Welch's t statistics) of these two sets of genes
 in one sample. Basically, if the genes activated by a TF are highly
