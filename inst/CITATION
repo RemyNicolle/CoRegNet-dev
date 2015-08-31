@@ -7,11 +7,11 @@ citEntry(entry  = "Article",
                  person(given="Francois", family="Radvanyi"),
                  person(given="Mohamed", family="Elati")
     		),
-		year="2014",
-		journal="In preperation",
+		year="2015",
+		journal="Bioinformatics",
 		textVersion = paste("R. Nicolle,F. Radvanyi, M. Elati,","
 		 CoRegNet: reconstruction and integrated analysis of co-regulatory networks,",
-		  "In preperation")
+		  "doi:10.1093/bioinformatics/btv305")
 	)
 
 citFooter("This free open-source software implements academic

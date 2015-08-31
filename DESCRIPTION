@@ -1,4 +1,4 @@
-Package: CoRegNet
+IPackage: CoRegNet
 Type: Package
 Title: CoRegNet : reconstruction and integrated analysis of co-regulatory
 	networks
